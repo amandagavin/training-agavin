@@ -1,0 +1,74 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Header 1
+
+### Smaller Header
+
+Write some text here. **Using the shift-8 star keys will make text bold**.
+
+create a list with asterick
+
+-   apple
+-   banana
+-   kiwi
+-   need a blank line to start a list
+
+To complete the task, I am writing in *italic*.
+
+A numbered list below:
+
+1.  list
+2.  list
+3.  list
+
+## I think sub header is Header 2
+
+#### subheader is the 4th level
+
+insert citation
+using the far right diagram to enter a citation, visual markdown
+
+add a biobilography section, references.bib is in the directory. bibtech document
+the reference to the citation will be included in the line. 
+
+markdown table synteax is annoying, so the insert selection is helpful. 
+
+
+how to add Rcode into the document. 
+
+```{r}
+x <- 3+2
+
+y <- 2+7
+```
+```{r}
+
+```
+
+
+##Read in data
+
+```{r}
+bg_chem <- read.csv("../Data/BGchem2008data.csv")
+```
+
+```{r}
+read.csv(" ../Data/")
+
+read.csv("Data/BGchem2008data.csv")
+
+```
+
+
+## Analysis
+
+## Plots
+
+
