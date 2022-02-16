@@ -9,4 +9,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 [Data Tidying](https://amandagavin.github.io/training-agavin/Rmd/Data-Tidying)
 
-[Data Tidying](Rmd/Data Tidying.html)
+[Data Tidying](Rmd/Data-Tidying.html)
+
+set echo = FALSE (will prevent code from showing)
+and have a plot 
+
+how to insert an image
+
+![](image.png)
