@@ -1,0 +1,128 @@
+---
+title: "Data Tidying"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE, warning = FALSE} 
+library(dplyr)
+library(tidyr)
+library(readr)
+```
+
+message = FALSE, warning = FALSE. will not list these errors in knitted document
+
+using just the URL in read.csv can read directly from the download link instead of downloading. 
+```{r}
+catch_original <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.302.1")
+```
+
+readr package is read_csv is a bit smarter for guessing column types and a bit more efficient when reading in larger files
+
+##Split-Apply-Combine
+```{r}
+head(catch_original)
+```
+
+
+```{r}
+catch_data <- catch_original %>% 
+  #select(Region, Year, Chinook, Coho, Pink, Chum, Sockeye)
+#head(catch_data)
+
+select(-All, -notesRegCode)
+
+glimpse(catch_data)
+summary(catch_data)
+```
+
+- change Chinook from character to numeric type.
+mutate can do this
+NAs introduced by coercion: didn't know what to do with the value
+```{r}
+catch_clean <- catch_data %>% mutate(Chinook = as.numeric(Chinook) )
+```
+###finding spurious characters in Chinook column
+which returns numbers for which a statement is true
+and then go find the row
+go check the original data (perhaps an I instead of a 1). 
+```{r}
+i <- which (is.na(catch_clean$Chinook))
+i
+catch_original[i,]
+```
+use mutate
+```{r}
+catch_clean <- catch_data %>% 
+  mutate(Chinook = if_else(Chinook == "I","1", Chinook)) %>%
+  mutate(Chinook = as.numeric(Chinook))
+```
+##reshaping data
+c function specifies a vector
+
+rename() can rename columns
+```{r}
+catch_long <- catch_clean %>% 
+  pivot_longer(cols = -c(Region,Year), names_to = "Species",
+               values_to = "Catch") %>% 
+  rename(catch_thousands = Catch) %>%
+  mutate(catch = catch_thousands*1000) %>%
+  select(-catch_thousands)
+
+head(catch_long)
+```
+
+```{r}
+catch_wide <- catch_long %>%
+  pivot_wider(names_from = Region, values_from = catch)
+```
+
+if the column name already exists, it can be without "
+if you are making a new column add "
+
+##split apply combine
+
+-calculate mean salmon catch by region
+(split along region varaible and apply mean function by catch)
+
+filter- grabs rows
+group by - graps columns
+
+```{r}
+mean_region <- catch_long %>% 
+  filter(Species == "Sockeye") %>% 
+  group_by(Region, Species) %>% 
+  summarise(catch_mean = mean(catch),
+            n = n(),
+            .groups = "drop")
+
+head(mean_region)
+```
+
+ %>% rename(Region, code)
+ can use this to rename the code
+
+```{r}
+region_defs <- read.csv("https://knb.ecoinformatics.org/knb/d1/mn/v2/object/df35b.303.1") %>% 
+    select(code, mgmtArea)
+
+head(region_defs)
+```
+
+use c for combine column
+```{r}
+catch_joined <- left_join(catch_long, region_defs, by = c("Region" = "code"))
+
+head(catch_joined)
+
+nrow(catch_joined) == nrow(catch_long)
+```
+
+separate and unite are also helpful. 
+
+##Joins
+
+%>% 
