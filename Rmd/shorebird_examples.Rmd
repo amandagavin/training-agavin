@@ -1,0 +1,102 @@
+---
+title: "Shorebird Project"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(rvest)
+library(readr)
+library(dplyr)
+library(janitor)
+library(ggplot2)
+```
+
+
+
+
+
+```{r}
+predators <- read_csv("https://arcticdata.io/metacat/d1/mn/v2/object/urn%3Auuid%3A9ffec04c-7e2d-41dd-9e88-b6c2e8c4375e")
+
+nests <- read_csv("https://arcticdata.io/metacat/d1/mn/v2/object/urn%3Auuid%3A982bd2fc-4edf-4da7-96ef-0d11b853102d")
+
+head(predators)
+head(nests)
+```
+
+```{r}
+webpage <- read_html("https://www.pwrc.usgs.gov/bbl/manual/speclist.cfm")
+
+tbls <- html_nodes(webpage, "table") %>% 
+    html_table(fill = TRUE)
+
+species <- tbls[[1]] %>% 
+    clean_names() %>% 
+    select(alpha_code, common_name) %>% 
+    mutate(alpha_code = tolower(alpha_code))
+```
+
+```{r}
+predtors_commonname <- left_join(predators, species, by = c("species" = "alpha_code"))
+```
+
+fahr_to_celsius <- function(fahr) {
+  celsius <- (fahr-32)*5/9
+  return(celsius)
+}
+
+```{r}
+code_to_commonname <- function(x,y) {
+  commonname <- left_join(x,y, by = c("species" = "alpha_code"))
+  return(commonname)
+}
+
+str(x)
+```
+
+```{r}
+total_predators <- x %>% select(year, common_name, count) %>% na.omit %>% 
+  group_by(year, common_name) %>% summarise(predator_count = sum(count))
+
+head(total_predators)
+
+```
+
+
+```{r}
+x <- code_to_commonname(predators, species)
+```
+
+##Plotting
+ ggplot(total_predators, aes( x = year, y = predator_count, color = common_name))+
+geom_point()
+
+```{r}
+ ggplot(total_predators, aes(x = year, y = predator_count, color = common_name))+
+geom_point () +
+  geom_line ()
+```
+
+Calculate total number of eggs predated by year and species.
+
+```{r}
+nests <- read_csv("https://arcticdata.io/metacat/d1/mn/v2/object/urn%3Auuid%3A982bd2fc-4edf-4da7-96ef-0d11b853102d")
+
+head(nests)
+```
+
+```{r}
+nest_commonname <- code_to_commonname (nests,species)
+```
+
+
+```{r}
+total_predated_eggs <- nest_commonname %>% select(year, common_name, number_eggs_predated) %>% na.omit %>% 
+  group_by(year, common_name) %>% summarise(egg_count = sum(number_eggs_predated))
+
+```
+
